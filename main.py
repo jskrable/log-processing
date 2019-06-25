@@ -19,16 +19,15 @@ def dig_logs(in_rec, errors=[], path=None):
     
     if type(in_rec) is dict:
         for key, val in in_rec.items():
-            path = path + '.' + key if path else key
+            # path = path + '.' + key if path else key
             if key == 'reason':
-                # errors.append({path : val})
+                # errors.append({'path': path, 'error' : val})
                 errors.append(val)
-            else:    
+            elif type(val) is dict or list:
+                path = path + '.' + key if path else key    
                 dig_logs(val, errors, path)
     elif type(in_rec) is list:
-    
         [dig_logs(x, errors, path) for x in in_rec]
-
     return errors
 
 errors = dig_logs(data)
