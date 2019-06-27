@@ -4,9 +4,27 @@ import java.util
 import json
 import collections
 
-
-def dig_logs(in_rec, errors=[], path=None):
+global errors
+# def dig_logs(in_rec, errors=[], path=None):
     
+#     if type(in_rec) is dict:
+#         for key, val in in_rec.items():
+#             # path = path + '.' + key if path else key
+#             if key == 'reason':
+#                 # errors.append({'path': path, 'error' : val})
+#                 errors.append(val)
+#             elif type(val) is dict or list:
+#                 path = path + '.' + key if path else key    
+#                 dig_logs(val, errors, path)
+#     elif type(in_rec) is list:
+#         [dig_logs(x, errors, path) for x in in_rec]
+
+#     return errors
+
+def dig_logs(in_rec):
+    
+    global errors
+
     if type(in_rec) is dict:
         for key, val in in_rec.items():
             # path = path + '.' + key if path else key
@@ -15,9 +33,10 @@ def dig_logs(in_rec, errors=[], path=None):
                 errors.append(val)
             elif type(val) is dict or list:
                 path = path + '.' + key if path else key    
-                dig_logs(val, errors, path)
+                dig_logs(val)
     elif type(in_rec) is list:
-        [dig_logs(x, errors, path) for x in in_rec]
+        [dig_logs(x) for x in in_rec]
+        
     return errors
 
 class TransformScript(ScriptHook):
@@ -35,11 +54,16 @@ class TransformScript(ScriptHook):
             try:
                 # Read the next document, wrap it in a map and write out the wrapper
                 in_doc = self.input.next()
-                in_rec = json.loads(in_doc['doc'])
-                errors = dig_logs(in_rec)
-                summary = collections.Counter(errors)
+                # in_rec = json.loads(in_doc['group'])
+
+                global errors
+                errors = []
+                errors = dig_logs(in_doc['group'])
+                summary = {}
+                summary = dict(collections.Counter(errors))
+
                 out_doc = java.util.HashMap()
-                out_doc['summary'] = summary
+                out_doc['summary'] = errors
 
                 self.output.write(out_doc)
             except Exception as e:
