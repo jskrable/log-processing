@@ -11,6 +11,7 @@ import collections
 import sys
 import string
 import argparse
+import pprint
 
 
 # Progress bar for cli
@@ -35,14 +36,12 @@ def arg_parser():
     return args
 
 
-
-
 def dig_logs(in_rec, errors=[], path=None):
     
     if type(in_rec) is dict:
         for key, val in in_rec.items():
             # path = path + '.' + key if path else key
-            if key == 'reason':
+            if key.lower() == 'error':
                 # errors.append({'path': path, 'error' : val})
                 errors.append(val)
             elif type(val) is dict or list:
@@ -67,5 +66,5 @@ errors = dig_logs(data)
 summary = dict(collections.Counter(errors))
 
 print('Error Message    :   Count')
-print(summary)
+pprint.pprint(summary)
 
